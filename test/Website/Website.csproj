@@ -3,17 +3,18 @@
   <PropertyGroup>
     <AssemblyName>Winton.Extensions.Configuration.Consul.Test.Website</AssemblyName>
     <RootNamespace>Winton.Extensions.Configuration.Consul.Website</RootNamespace>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
+    <ProjectReference Include="..\..\src\Winton.Extensions.Configuration.Consul\Winton.Extensions.Configuration.Consul.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Winton.Extensions.Configuration.Consul\Winton.Extensions.Configuration.Consul.csproj" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
 </Project>

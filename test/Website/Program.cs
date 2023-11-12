@@ -1,38 +1,45 @@
 using System;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Winton.Extensions.Configuration.Consul;
 
-namespace Winton.Extensions.Configuration.Consul.Website
-{
-    internal sealed class Program
-    {
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host
-                .CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(builder => builder.UseStartup<Startup>())
-                .ConfigureAppConfiguration(
-                    builder =>
-                    {
-                        builder
-                            .AddConsul(
-                                "appsettings.json",
-                                options =>
-                                {
-                                    options.ConsulConfigurationOptions =
-                                        cco => { cco.Address = new Uri("http://consul:8500"); };
-                                    options.Optional = true;
-                                    options.PollWaitTime = TimeSpan.FromSeconds(5);
-                                    options.ReloadOnChange = true;
-                                })
-                            .AddEnvironmentVariables();
-                    });
-        }
+const string appTitle = "Test Website";
 
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
-    }
-}
+const string version = "v1";
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+           .AddConsul(
+               "appsettings.json",
+               options =>
+               {
+                   options.ConsulConfigurationOptions =
+                       cco => { cco.Address = new Uri("http://consul:8500"); };
+                   options.Optional = true;
+                   options.PollWaitTime = TimeSpan.FromSeconds(5);
+                   options.ReloadOnChange = true;
+               })
+           .AddEnvironmentVariables();
+
+builder.Services.AddSwaggerGen(
+        opt => { opt.SwaggerDoc(version, new OpenApiInfo { Title = appTitle, Version = version }); });
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseDeveloperExceptionPage()
+       .UseSwagger()
+       .UseSwaggerUI(
+           opt =>
+           {
+               opt.SwaggerEndpoint($"swagger/{version}/swagger.json", appTitle);
+               opt.RoutePrefix = string.Empty;
+           })
+       .UseRouting()
+       .UseEndpoints(opt => opt.MapControllers());
+
+app.Run();
